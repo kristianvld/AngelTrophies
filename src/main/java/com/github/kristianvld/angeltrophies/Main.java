@@ -3,6 +3,7 @@ package com.github.kristianvld.angeltrophies;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -32,6 +33,14 @@ public class Main extends JavaPlugin {
         cmdHandler = new CommandHandler();
 
         loadManagers();
+    }
+
+    public void reload() {
+        HandlerList.unregisterAll(stickerManager);
+        HandlerList.unregisterAll(trophyManager);
+        getLogger().info("Reloading...");
+        loadManagers();
+        getLogger().info("Done Reloading.");
     }
 
     private void loadManagers() {
@@ -105,6 +114,8 @@ public class Main extends JavaPlugin {
                 getLogger().log(Level.SEVERE, "Error while parsing config file " + file.getPath(), e);
             }
         }
+        getLogger().info("Loaded " + skins.size() + " skins.");
+        getLogger().info("Loaded " + trophies.size() + " trophies.");
 
         stickerManager = new StickerManager(skins);
         trophyManager = new TrophyManager(trophies);
