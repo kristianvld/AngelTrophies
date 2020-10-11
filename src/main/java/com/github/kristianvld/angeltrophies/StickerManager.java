@@ -147,7 +147,9 @@ public class StickerManager implements Listener {
             String stickerName = OraxenItems.getIdByItem(drops.get(i));
             if (stickerItems.contains(stickerName)) {
                 List<String> lost = lostSkins.computeIfAbsent(event.getEntity().getUniqueId(), u -> new ArrayList<>());
-                lost.add(stickerName);
+                for (int ii = 0; ii < drops.get(i).getAmount(); ii++) {
+                    lost.add(stickerName);
+                }
                 save = true;
                 drops.remove(i);
                 i--;
@@ -192,7 +194,7 @@ public class StickerManager implements Listener {
         C.main(player, "It seems you were unfortunate enough to die while\n" +
                 "carrying some skinned items. I have taken care of\n" +
                 "the items for you in the mean time.\n" +
-                "Use {0} to get your skins back.", "/trophy lostSkins");
+                "Use {0} to get your skins back.", "/skin lost");
     }
 
     public void claimLostSkins(Player player) {
