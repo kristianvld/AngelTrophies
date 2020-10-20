@@ -1,0 +1,44 @@
+on:
+  create:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+      - '[0-9]+.[0-9]+.[0-9]+-*'
+
+
+name: build
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Init checkout
+        uses: actions/checkout@v2
+      - name: Extract version to env
+        run: echo ::set-env name=version::${GITHUB_REF#refs/*/}
+      - name: Gradle build
+        uses: eskatos/gradle-command-action@v1
+        with:
+          arguments: build
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.version }}
+          release_name: Release ${{ env.version }}
+          draft: false
+          prerelease: ${{ contains(env.version, '-') }}
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/libs/AngelTrophies.jar
+          asset_name: AngelTrophies-${{ env.version }}.jar
+          asset_content_type: application/zip
