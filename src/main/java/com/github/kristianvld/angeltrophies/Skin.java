@@ -1,7 +1,6 @@
 package com.github.kristianvld.angeltrophies;
 
 import io.th0rgal.oraxen.items.OraxenItems;
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
@@ -108,7 +107,6 @@ public class Skin {
 
         ItemMeta im = item.getItemMeta();
         im.setCustomModelData(targetID);
-        Bukkit.broadcastMessage("current: " + im.getDisplayName() + ", source: " + sourceDisplayName + ", target: " + targetDisplayName);
         if (Objects.equals(getDisplayName(item), sourceDisplayName)) {
             im.setDisplayName(targetDisplayName);
         }
