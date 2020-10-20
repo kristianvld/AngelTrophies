@@ -99,6 +99,7 @@ public class Trophy {
 
     public boolean matches(Entity entity) {
         return entity instanceof ArmorStand
+                && entity.isValid()
                 && entity.getPersistentDataContainer().has(OWNER_KEY, UUIDTagType.UUID)
                 && entity.getPersistentDataContainer().has(DIRECTION_KEY, UUIDTagType.INTEGER);
     }

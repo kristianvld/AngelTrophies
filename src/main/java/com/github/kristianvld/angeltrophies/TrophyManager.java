@@ -53,9 +53,11 @@ public class TrophyManager implements Listener {
     }
 
     public Trophy getTrophy(Entity entity) {
-        for (Trophy trophy : trophies) {
-            if (trophy.matches(entity)) {
-                return trophy;
+        if (entity != null && entity.isValid()) {
+            for (Trophy trophy : trophies) {
+                if (trophy.matches(entity)) {
+                    return trophy;
+                }
             }
         }
         return null;
