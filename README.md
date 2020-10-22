@@ -1,6 +1,8 @@
 # AngelTrophies
 [Angel's Reach](https://angels-reach.com/) skinable items and placable trophy system, utilising [Oraxen](https://github.com/oraxen/Oraxen).
 
+[![Latest Release](https://img.shields.io/github/v/release/kristianvld/AngelTrophies?include_prereleases&label=Latest%20Release)](https://github.com/kristianvld/AngelTrophies/releases)
+
 # Features
 * Sticker system to skin items
   * Supports multi-layer skinning
