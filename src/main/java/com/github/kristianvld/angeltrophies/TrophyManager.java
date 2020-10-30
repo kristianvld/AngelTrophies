@@ -6,12 +6,20 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockBurnEvent;
+import org.bukkit.event.block.BlockExplodeEvent;
+import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.BlockPistonExtendEvent;
+import org.bukkit.event.block.BlockPistonRetractEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -22,6 +30,7 @@ import org.spigotmc.event.entity.EntityDismountEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -118,15 +127,80 @@ public class TrophyManager implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onBreak(BlockBreakEvent event) {
-        if (event.getBlock().getType() == Trophy.SLAB_TYPE) {
-            for (Entity e : event.getBlock().getWorld().getNearbyEntities(event.getBlock().getLocation().add(0.5, 0.5, 0.5), 0.5, 0.5, 0.5)) {
+    private boolean isTrophy(Block block) {
+        if (block.getType() == Trophy.SLAB_TYPE) {
+            for (Entity e : block.getWorld().getNearbyEntities(block.getLocation().add(0.5, 0.5, 0.5), 0.5, 0.5, 0.5)) {
                 if (getTrophy(e) != null && e.getPersistentDataContainer().has(Trophy.SEAT_KEY, UUIDTagType.UUID)) {
-                    event.setCancelled(true);
-                    return;
+                    return true;
                 }
             }
+        }
+        return false;
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onBreak(BlockBreakEvent event) {
+        if (isTrophy(event.getBlock())) {
+            event.setCancelled(true);
+        }
+    }
+
+    private void onExplosion(List<Block> blocks) {
+        for (Iterator<Block> it = blocks.iterator(); it.hasNext(); ) {
+            Block b = it.next();
+            if (isTrophy(b)) {
+                it.remove();
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onExplosion(BlockExplodeEvent event) {
+        onExplosion(event.blockList());
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onExplosion(EntityExplodeEvent event) {
+        onExplosion(event.blockList());
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onEntityChangeBlock(EntityChangeBlockEvent event) {
+        if (isTrophy(event.getBlock())) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onFire(BlockBurnEvent event) {
+        if (isTrophy(event.getBlock())) {
+            event.setCancelled(true);
+        }
+    }
+
+    private void onPiston(List<Block> blocks, Cancellable event) {
+        for (Block b : blocks) {
+            if (isTrophy(b)) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onPiston(BlockPistonExtendEvent event) {
+        onPiston(event.getBlocks(), event);
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onPiston(BlockPistonRetractEvent event) {
+        onPiston(event.getBlocks(), event);
+    }
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onIgnite(BlockIgniteEvent event) {
+        if (isTrophy(event.getBlock())) {
+            event.setCancelled(true);
         }
     }
 
