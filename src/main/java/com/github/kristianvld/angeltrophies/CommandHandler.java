@@ -15,7 +15,11 @@ import java.util.stream.Collectors;
 
 public class CommandHandler implements CommandExecutor, TabCompleter {
 
-    private String reloadPermission = "angeltrophies.reload";
+    public final static String reloadPermission = "angeltrophies.reload";
+    public final static String mergePermission = "angeltrophies.merge";
+    public final static String splitPermission = "angeltrophies.merge";
+    public final static String lostPermission = "angeltrophies.merge";
+    public final static String permissionDeniedMessage = "You do not have permission to use that command.";
 
     public CommandHandler() {
         PluginCommand cmd = Main.getInstance().getCommand("skin");
@@ -35,11 +39,9 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             }
             return true;
         } else if (args[0].equalsIgnoreCase("reload")) {
-            if (sender.hasPermission(reloadPermission)) {
+            if (hasPermission(sender, permissionDeniedMessage)) {
                 Main.getInstance().reload();
                 C.main(sender, "Reloaded {0}.", Main.getInstance().getDescription().getName());
-            } else {
-                C.error(sender, "You do not have permission to use that command.");
             }
             return true;
         } else if (!(sender instanceof Player)) {
@@ -48,13 +50,27 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         }
         Player player = (Player) sender;
         if (args[0].equalsIgnoreCase("merge")) {
-            Main.getInstance().getStickerManager().merge(player);
+            if (hasPermission(sender, mergePermission)) {
+                Main.getInstance().getStickerManager().merge(player);
+            }
         } else if (args[0].equalsIgnoreCase("split")) {
-            Main.getInstance().getStickerManager().split(player);
+            if (hasPermission(sender, splitPermission)) {
+                Main.getInstance().getStickerManager().split(player);
+            }
         } else if (args[0].equalsIgnoreCase("lost")) {
-            Main.getInstance().getStickerManager().claimLostSkins(player);
+            if (hasPermission(sender, lostPermission)) {
+                Main.getInstance().getStickerManager().claimLostSkins(player);
+            }
         } else {
             C.error(player, "Unknown subcommand {0}", args[0]);
+        }
+        return true;
+    }
+
+    public static boolean hasPermission(CommandSender sender, String permission) {
+        if (!sender.hasPermission(permission)) {
+            C.error(sender, permissionDeniedMessage);
+            return false;
         }
         return true;
     }
