@@ -13,8 +13,7 @@
   * Enable "chair" mode to mound and dismount trophies as chairs
 
 # Building
-This plugin depends on [Oraxen](https://github.com/oraxen/Oraxen). To be able to build this project, place a compiled version of the plugin under `build/oraxen`, e.g. `build/oraxen/oraxen-1.58.0.jar`.
-After adding the Oraxen dependency, simply build with gradle, as:
+Simply build with gradle, as:
 ```bash
 ./gradlew build
 ```

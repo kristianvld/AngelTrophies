@@ -18,9 +18,7 @@ repositories {
 
 dependencies {
     compileOnly spigot('1.16.1')
-    // implementation 'com.github.oraxen:Oraxen:-SNAPSHOT'
-    // implementation 'com.github.oraxen:Oraxen:fix~laura-fixes-cb960ca25d-1' // only version I have found that works
-    compileOnly fileTree('build/oraxen')
+    implementation 'com.github.oraxen:Oraxen:5b10acaf8a'
 }
 
 def getVersionName = { ->
