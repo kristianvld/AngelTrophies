@@ -55,5 +55,6 @@ spigot {
     authors = ['kristianvld']
     apiVersion = '1.16'
     depends = ['Oraxen']
+    softDepends = ['AngelProtect', 'WorldGuard']
     website = 'https://github.com/kristianvld/AngelTrophies'
 }

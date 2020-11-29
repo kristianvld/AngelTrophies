@@ -98,6 +98,7 @@ public class TrophyManager implements Listener {
         Block block = event.getClickedBlock().getRelative(event.getBlockFace());
 
         if (!Main.getInstance().getExternal().canBuild(player, block)) {
+            C.error(player, "You can not place a trophy here.");
             return;
         }
 
@@ -129,6 +130,7 @@ public class TrophyManager implements Listener {
         } else {
             Block block = event.getRightClicked().getLocation().getBlock();
             if (!Main.getInstance().getExternal().canBuild(event.getPlayer(), block)) {
+                C.error(event.getPlayer(), "You can not pickup that trophy.");
                 return;
             }
             trophy.pickup(event.getPlayer(), event.getRightClicked());
