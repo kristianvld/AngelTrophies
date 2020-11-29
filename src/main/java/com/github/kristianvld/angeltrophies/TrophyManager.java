@@ -72,7 +72,7 @@ public class TrophyManager implements Listener {
         return null;
     }
 
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOW)
     public void onInteract(PlayerInteractEvent event) {
         Player player = event.getPlayer();
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getClickedBlock() == null || !player.isSneaking()) {
@@ -95,17 +95,21 @@ public class TrophyManager implements Listener {
         if (trophy == null) {
             return;
         }
+        Block block = event.getClickedBlock().getRelative(event.getBlockFace());
+
+        if (!Main.getInstance().getExternal().canBuild(player, block)) {
+            return;
+        }
+
         event.setUseInteractedBlock(Event.Result.DENY);
         event.setUseItemInHand(Event.Result.DENY);
-        Block block = event.getClickedBlock().getRelative(event.getBlockFace());
         BlockFace face = event.getBlockFace().getOppositeFace();
         if (trophy.place(player, block, face, event.getHand()) != null) {
             justPlacedTrophy.put(player.getUniqueId(), player.getTicksLived());
         }
-
     }
 
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.LOW)
     public void onEntityInteract(PlayerInteractAtEntityEvent event) {
         Trophy trophy = getTrophy(event.getRightClicked());
         if (trophy == null) {
@@ -123,6 +127,10 @@ public class TrophyManager implements Listener {
                 }
             }
         } else {
+            Block block = event.getRightClicked().getLocation().getBlock();
+            if (!Main.getInstance().getExternal().canBuild(event.getPlayer(), block)) {
+                return;
+            }
             trophy.pickup(event.getPlayer(), event.getRightClicked());
         }
     }
@@ -204,7 +212,7 @@ public class TrophyManager implements Listener {
         }
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler
     public void onSneak(PlayerToggleSneakEvent event) {
         UUID uuid = event.getPlayer().getUniqueId();
         long time = event.getPlayer().getTicksLived();

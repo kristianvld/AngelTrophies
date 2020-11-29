@@ -19,6 +19,7 @@ public class Main extends JavaPlugin {
     private StickerManager stickerManager;
     private TrophyManager trophyManager;
     private CommandHandler cmdHandler;
+    private External external;
 
     public StickerManager getStickerManager() {
         return stickerManager;
@@ -31,6 +32,7 @@ public class Main extends JavaPlugin {
         Trophy.init(this);
 
         cmdHandler = new CommandHandler();
+        external = new External();
 
         loadManagers();
     }
@@ -119,6 +121,10 @@ public class Main extends JavaPlugin {
 
         stickerManager = new StickerManager(skins);
         trophyManager = new TrophyManager(trophies);
+    }
+
+    public External getExternal() {
+        return external;
     }
 
     public static Main getInstance() {
