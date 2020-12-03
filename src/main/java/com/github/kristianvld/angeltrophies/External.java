@@ -17,31 +17,34 @@ import org.bukkit.entity.Player;
 
 public class External {
 
-    private boolean worldGuard;
-    private boolean angelProtect;
+    private final boolean worldGuard;
+    private final boolean angelProtect;
 
     public External() {
         worldGuard = Bukkit.getPluginManager().isPluginEnabled("WorldGuard");
+        if (worldGuard) {
+            Main.getInstance().getLogger().info("Found WorldGuard, will be using hook to check for external permissions.");
+        }
         angelProtect = Bukkit.getPluginManager().isPluginEnabled("AngelProtect");
+        if (angelProtect) {
+            Main.getInstance().getLogger().info("Found AngelProtect, will be using hook to check for external permissions.");
+        }
     }
 
     public boolean canBuild(Player player, Block block) {
         if (!canBuildAngelProtect(player, block)) {
             return false;
         }
-        if (!canBuildWorldGuard(player, block)) {
-            return false;
-        }
-        return true;
+        return canBuildWorldGuard(player, block);
     }
 
     public boolean canBuildWorldGuard(Player player, Block block) {
         if (worldGuard) {
 
-            LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
+            LocalPlayer wgPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
             WorldGuardPlatform platform = WorldGuard.getInstance().getPlatform();
 
-            if (platform.getSessionManager().hasBypass(localPlayer, localPlayer.getWorld())) {
+            if (platform.getSessionManager().hasBypass(wgPlayer, wgPlayer.getWorld())) {
                 return true; // has bypass permission
             }
 
@@ -49,7 +52,7 @@ public class External {
             RegionContainer container = platform.getRegionContainer();
             RegionQuery query = container.createQuery();
 
-            return query.testState(loc, localPlayer, Flags.BUILD);
+            return query.testState(loc, wgPlayer, Flags.BUILD);
         }
         return true;
     }

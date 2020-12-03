@@ -1,4 +1,4 @@
-package com.github.kristianvld.angeltrophies;
+package com.github.kristianvld.angeltrophies.util;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;

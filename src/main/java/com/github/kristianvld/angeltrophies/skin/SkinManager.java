@@ -1,5 +1,8 @@
-package com.github.kristianvld.angeltrophies;
+package com.github.kristianvld.angeltrophies.skin;
 
+import com.github.kristianvld.angeltrophies.CommandHandler;
+import com.github.kristianvld.angeltrophies.Main;
+import com.github.kristianvld.angeltrophies.util.C;
 import io.th0rgal.oraxen.items.OraxenItems;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -36,9 +39,8 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.logging.Level;
 
-public class StickerManager implements Listener {
+public class SkinManager implements Listener {
 
     private final List<Skin> skins;
     private final Set<String> stickerItems = new HashSet<>();
@@ -49,7 +51,7 @@ public class StickerManager implements Listener {
     private final Map<UUID, Long> grinding = new HashMap<>();
     private final long GRINDING_TIME = 1000;
 
-    public StickerManager(List<Skin> skins) {
+    public SkinManager(List<Skin> skins) {
         this.skins = new ArrayList<>(skins);
         for (Skin skin : skins) {
             stickerItems.add(skin.getStickerName());
@@ -70,7 +72,7 @@ public class StickerManager implements Listener {
                     }
                 }
             } catch (FileNotFoundException e) {
-                Main.getInstance().getLogger().log(Level.SEVERE, "Error loading LostSkins file!", e);
+                throw new RuntimeException("Error loading LostSkins file!", e);
             }
         }
     }

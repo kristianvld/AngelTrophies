@@ -1,5 +1,11 @@
 package com.github.kristianvld.angeltrophies;
 
+import com.github.kristianvld.angeltrophies.couch.CouchRole;
+import com.github.kristianvld.angeltrophies.couch.CouchUtil;
+import com.github.kristianvld.angeltrophies.skin.Skin;
+import com.github.kristianvld.angeltrophies.skin.SkinManager;
+import com.github.kristianvld.angeltrophies.trophy.Trophy;
+import com.github.kristianvld.angeltrophies.trophy.TrophyManager;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -16,29 +22,35 @@ public class Main extends JavaPlugin {
 
     private static Main instance;
 
-    private StickerManager stickerManager;
+    private SkinManager skinManager;
     private TrophyManager trophyManager;
     private CommandHandler cmdHandler;
     private External external;
 
-    public StickerManager getStickerManager() {
-        return stickerManager;
+    public SkinManager getStickerManager() {
+        return skinManager;
     }
 
     @Override
     public void onEnable() {
-        instance = this;
-        Skin.init(this);
-        Trophy.init(this);
+        try {
+            instance = this;
+            Skin.init(this);
+            Trophy.init(this);
 
-        cmdHandler = new CommandHandler();
-        external = new External();
+            cmdHandler = new CommandHandler();
+            external = new External();
 
-        loadManagers();
+            loadManagers();
+        } catch (Exception e) {
+            getLogger().log(Level.SEVERE, "Error while enabling:", e);
+            getLogger().severe("An error occurred while enabling AngelTrophies, disabling...");
+            setEnabled(false);
+        }
     }
 
     public void reload() {
-        HandlerList.unregisterAll(stickerManager);
+        HandlerList.unregisterAll(skinManager);
         HandlerList.unregisterAll(trophyManager);
         getLogger().info("Reloading...");
         loadManagers();
@@ -69,7 +81,7 @@ public class Main extends JavaPlugin {
                                         try {
                                             id = Integer.parseInt(split[split.length - 1]);
                                             material = String.join("_", Arrays.asList(split).subList(0, split.length - 1));
-                                        } catch (NumberFormatException e) {
+                                        } catch (NumberFormatException ignored) {
                                         }
                                         material = material.replaceFirst("_", ":");
                                         skins.add(new Skin(Material.matchMaterial(material), id, target, key));
@@ -78,48 +90,39 @@ public class Main extends JavaPlugin {
                                     }
                                 }
                             } catch (Exception e) {
-                                getLogger().log(Level.SEVERE, "Error while parsing skin " + key + ".skin." + source, e);
+                                throw new RuntimeException("Error while parsing skin " + key + ".skin." + source, e);
                             }
                         }
                     } else if (yaml.isConfigurationSection(key + ".trophies")) {
                         try {
                             ConfigurationSection t = yaml.getConfigurationSection(key + ".trophies");
-                            boolean floor = false;
-                            boolean floorSmall = false;
-                            double floorOffset = 0.0;
-                            boolean wall = false;
-                            boolean wallSmall = false;
-                            double wallOffset = 0.0;
-                            boolean floorPlaceSlab = false;
-                            float floorRotationResolution = 45;
-                            if (t.isConfigurationSection("floor")) {
-                                floor = true;
-                                floorSmall = t.getBoolean("floor.small", floorSmall);
-                                floorOffset = t.getDouble("floor.offset", floorOffset);
-                                floorPlaceSlab = t.getBoolean("floor.place_slab", floorPlaceSlab);
-                                floorRotationResolution = (float) t.getDouble("floor.rotation_resolution", floorRotationResolution);
-                            }
-                            if (t.isConfigurationSection("wall")) {
-                                wall = true;
-                                wallSmall = t.getBoolean("wall.small", wallSmall);
-                                wallOffset = t.getDouble("wall.offset", wallOffset);
-                            }
+                            boolean floor = t.isConfigurationSection("floor");
+                            boolean floorSmall = t.getBoolean("floor.small", false);
+                            double floorOffset = t.getDouble("floor.offset", 0.0);
+                            boolean wall = t.isConfigurationSection("wall");
+                            boolean wallSmall = t.getBoolean("wall.small", false);
+                            double wallOffset = t.getDouble("wall.offset", 0.0);
+                            boolean floorPlaceSlab = t.getBoolean("floor.place_slab", false);
+                            float floorRotationResolution = (float) t.getDouble("floor.rotation_resolution", 45);
+                            String cGroup = t.getString("floor.couch.group", null);
+                            CouchRole cRole = CouchRole.parse(t.getString("floor.couch.role", null));
                             if (floor || wall) {
-                                trophies.add(new Trophy(key, floor, floorSmall, floorOffset, wall, wallSmall, wallOffset, floorPlaceSlab, floorRotationResolution));
+                                trophies.add(new Trophy(key, floor, floorSmall, floorOffset, wall, wallSmall, wallOffset, floorPlaceSlab, floorRotationResolution, cGroup, cRole));
                             }
                         } catch (Exception e) {
-                            getLogger().log(Level.SEVERE, "Error while parsing trophy " + key + ".trophies", e);
+                            throw new RuntimeException("Error while parsing trophy " + key + ".trophies", e);
                         }
                     }
                 }
             } catch (Exception e) {
-                getLogger().log(Level.SEVERE, "Error while parsing config file " + file.getPath(), e);
+                throw new RuntimeException("Error while parsing config file " + file.getPath(), e);
             }
         }
+        CouchUtil.buildCache(trophies);
         getLogger().info("Loaded " + skins.size() + " skins.");
         getLogger().info("Loaded " + trophies.size() + " trophies.");
 
-        stickerManager = new StickerManager(skins);
+        skinManager = new SkinManager(skins);
         trophyManager = new TrophyManager(trophies);
     }
 

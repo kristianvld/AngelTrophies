@@ -1,5 +1,6 @@
-package com.github.kristianvld.angeltrophies;
+package com.github.kristianvld.angeltrophies.skin;
 
+import com.github.kristianvld.angeltrophies.Main;
 import io.th0rgal.oraxen.items.OraxenItems;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;

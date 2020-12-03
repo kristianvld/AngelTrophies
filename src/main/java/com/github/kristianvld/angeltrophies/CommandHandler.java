@@ -1,5 +1,6 @@
 package com.github.kristianvld.angeltrophies;
 
+import com.github.kristianvld.angeltrophies.util.C;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;

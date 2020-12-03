@@ -1,5 +1,8 @@
-package com.github.kristianvld.angeltrophies;
+package com.github.kristianvld.angeltrophies.trophy;
 
+import com.github.kristianvld.angeltrophies.Main;
+import com.github.kristianvld.angeltrophies.couch.CouchUtil;
+import com.github.kristianvld.angeltrophies.util.C;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -23,14 +26,15 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.player.PlayerInteractAtEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.BlockVector;
 import org.spigotmc.event.entity.EntityDismountEvent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -56,17 +60,6 @@ public class TrophyManager implements Listener {
         for (Trophy trophy : trophies) {
             if (trophy.matches(item)) {
                 return trophy;
-            }
-        }
-        return null;
-    }
-
-    public Trophy getTrophy(Entity entity) {
-        if (entity != null && entity.isValid()) {
-            for (Trophy trophy : trophies) {
-                if (trophy.matches(entity)) {
-                    return trophy;
-                }
             }
         }
         return null;
@@ -105,15 +98,20 @@ public class TrophyManager implements Listener {
         event.setUseInteractedBlock(Event.Result.DENY);
         event.setUseItemInHand(Event.Result.DENY);
         BlockFace face = event.getBlockFace().getOppositeFace();
-        if (trophy.place(player, block, face, event.getHand()) != null) {
+
+        Trophy trophyPlace = CouchUtil.getTrophy(trophy, block, player.getLocation().getYaw());
+        if (trophyPlace != trophy) {
+            item = trophyPlace.getExampleItem();
+        }
+
+        if (trophyPlace.place(player, block, face, event.getHand(), item) != null) {
             justPlacedTrophy.put(player.getUniqueId(), player.getTicksLived());
         }
     }
 
     @EventHandler(priority = EventPriority.LOW)
     public void onEntityInteract(PlayerInteractAtEntityEvent event) {
-        Trophy trophy = getTrophy(event.getRightClicked());
-        if (trophy == null) {
+        if (!Trophy.isTrophy(event.getRightClicked())) {
             return;
         }
         event.setCancelled(true);
@@ -121,11 +119,12 @@ public class TrophyManager implements Listener {
             if (event.getPlayer().isInsideVehicle()) {
                 return;
             }
-            Entity seat = trophy.getSeat(event.getRightClicked());
+            Entity seat = Trophy.getSeat(event.getRightClicked());
             if (seat != null) {
                 if (seat.getPassengers().isEmpty()) {
                     seat.addPassenger(event.getPlayer());
                 }
+                event.setCancelled(true);
             }
         } else {
             Block block = event.getRightClicked().getLocation().getBlock();
@@ -133,35 +132,20 @@ public class TrophyManager implements Listener {
                 C.error(event.getPlayer(), "You can not pickup that trophy.");
                 return;
             }
-            trophy.pickup(event.getPlayer(), event.getRightClicked());
+            Trophy.pickup(event.getPlayer(), event.getRightClicked());
+            event.setCancelled(true);
         }
-    }
-
-    private boolean isTrophy(Block block) {
-        if (block.getType() == Trophy.SLAB_TYPE) {
-            for (Entity e : block.getWorld().getNearbyEntities(block.getLocation().add(0.5, 0.5, 0.5), 0.5, 0.5, 0.5)) {
-                if (getTrophy(e) != null && e.getPersistentDataContainer().has(Trophy.SEAT_KEY, UUIDTagType.UUID)) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onBreak(BlockBreakEvent event) {
-        if (isTrophy(event.getBlock())) {
+        if (Trophy.getTrophy(event.getBlock()) != null) {
             event.setCancelled(true);
         }
     }
 
     private void onExplosion(List<Block> blocks) {
-        for (Iterator<Block> it = blocks.iterator(); it.hasNext(); ) {
-            Block b = it.next();
-            if (isTrophy(b)) {
-                it.remove();
-            }
-        }
+        blocks.removeIf(b -> Trophy.getTrophy(b) != null);
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -176,21 +160,21 @@ public class TrophyManager implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onEntityChangeBlock(EntityChangeBlockEvent event) {
-        if (isTrophy(event.getBlock())) {
+        if (Trophy.getTrophy(event.getBlock()) != null) {
             event.setCancelled(true);
         }
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onFire(BlockBurnEvent event) {
-        if (isTrophy(event.getBlock())) {
+        if (Trophy.getTrophy(event.getBlock()) != null) {
             event.setCancelled(true);
         }
     }
 
     private void onPiston(List<Block> blocks, Cancellable event) {
         for (Block b : blocks) {
-            if (isTrophy(b)) {
+            if (Trophy.getTrophy(b) != null) {
                 event.setCancelled(true);
                 return;
             }
@@ -209,7 +193,7 @@ public class TrophyManager implements Listener {
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onIgnite(BlockIgniteEvent event) {
-        if (isTrophy(event.getBlock())) {
+        if (Trophy.getTrophy(event.getBlock()) != null) {
             event.setCancelled(true);
         }
     }
@@ -219,17 +203,16 @@ public class TrophyManager implements Listener {
         UUID uuid = event.getPlayer().getUniqueId();
         long time = event.getPlayer().getTicksLived();
         if (!event.getPlayer().isInsideVehicle() && dismount.getOrDefault(uuid, 0L) < time) {
-            if (event.getPlayer().getLocation().getBlock().getType() == Trophy.SLAB_TYPE) {
-                for (Entity e : event.getPlayer().getLocation().getBlock().getWorld().getNearbyEntities(event.getPlayer().getLocation().getBlock().getLocation().add(0.5, 0.5, 0.5), 0.5, 2.5, 0.5)) {
-                    if (e.getPersistentDataContainer().has(Trophy.TROPHY_PARENT_KEY, UUIDTagType.UUID)) {
-                        if (event.isSneaking()) {
-                            sneaking.put(uuid, time + SITTING_TIMEOUT);
-                        } else if (sneaking.getOrDefault(uuid, 0L) > time) {
-                            if (e.getPassengers().isEmpty()) {
-                                e.addPassenger(event.getPlayer());
-                            }
+            Entity trophy = Trophy.getTrophy(event.getPlayer().getLocation().getBlock());
+            if (trophy != null) {
+                Entity seat = Trophy.getSeat(trophy);
+                if (seat != null) {
+                    if (event.isSneaking()) {
+                        sneaking.put(uuid, time + SITTING_TIMEOUT);
+                    } else if (sneaking.getOrDefault(uuid, 0L) > time) {
+                        if (seat.getPassengers().isEmpty()) {
+                            seat.addPassenger(event.getPlayer());
                         }
-                        return;
                     }
                 }
             }
@@ -241,16 +224,22 @@ public class TrophyManager implements Listener {
         if (event.getEntity() instanceof Player) {
             Player player = (Player) event.getEntity();
             dismount.put(player.getUniqueId(), event.getEntity().getTicksLived() + DISMOUNT_TIMEOUT);
-            if (player.getLocation().add(0, 1, 0).getBlock().getType() == Trophy.SLAB_TYPE) {
-                for (Entity e : player.getLocation().getBlock().getWorld().getNearbyEntities(player.getLocation().getBlock().getLocation().add(0.5, 0.5, 0.5), 0.5, 2.5, 0.5)) {
-                    if (e.getPersistentDataContainer().has(Trophy.TROPHY_PARENT_KEY, UUIDTagType.UUID)) {
-                        Bukkit.getScheduler().runTask(Main.getInstance(), () -> {
-                            Location loc = event.getDismounted().getLocation().getBlock().getLocation().add(0.5, 0.5, 0.5);
-                            loc.setDirection(player.getLocation().getDirection());
-                            player.teleport(loc);
-                        });
-                        break;
+            Entity trophy = Trophy.getTrophy(event.getDismounted());
+            if (trophy != null) {
+                Entity seat = Trophy.getSeat(trophy);
+                if (seat != null) {
+                    Location pLoc = player.getLocation();
+                    BlockVector bv = Trophy.getBlockVector(trophy);
+                    Location loc;
+                    if (bv != null) {
+                        loc = bv.toLocation(pLoc.getWorld(), pLoc.getYaw(), pLoc.getPitch());
+                        loc.add(0.5, 0.5, 0.5);
+                    } else {
+                        loc = pLoc.add(0, 0.55, 0); // old legacy before we started storing block vector
                     }
+                    Bukkit.getScheduler().runTask(Main.getInstance(), () -> {
+                        player.teleport(loc, PlayerTeleportEvent.TeleportCause.UNKNOWN);
+                    });
                 }
             }
         }

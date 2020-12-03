@@ -1,4 +1,4 @@
-package com.github.kristianvld.angeltrophies;
+package com.github.kristianvld.angeltrophies.util;
 
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataType;
@@ -10,14 +10,17 @@ public class UUIDTagType implements PersistentDataType<byte[], UUID> {
 
     public final static UUIDTagType UUID = new UUIDTagType();
 
+    @Override
     public Class<byte[]> getPrimitiveType() {
         return byte[].class;
     }
 
+    @Override
     public Class<UUID> getComplexType() {
         return UUID.class;
     }
 
+    @Override
     public byte[] toPrimitive(UUID complex, PersistentDataAdapterContext context) {
         ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
         bb.putLong(complex.getMostSignificantBits());
@@ -25,6 +28,7 @@ public class UUIDTagType implements PersistentDataType<byte[], UUID> {
         return bb.array();
     }
 
+    @Override
     public UUID fromPrimitive(byte[] primitive, PersistentDataAdapterContext context) {
         ByteBuffer bb = ByteBuffer.wrap(primitive);
         long firstLong = bb.getLong();
