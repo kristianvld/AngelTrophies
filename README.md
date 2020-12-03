@@ -199,8 +199,8 @@ The role specifies the role type of this item and needs to be one of the followi
 
 All couch groups needs to have the `Single` role defined. This is the default role that will be placed and the role you will get when picking up any couch part. All other roles are optional.
 
-For designing couches or help with placing them for players see the [Design and placing diagram](#Design%20and%20placing%20diagram)
+For designing couches or help with placing them for players see the [Design and placing diagram](#Design%20and%20placing%20diagram).
 
 
 ### Design and placing diagram:
-![Couch Placing Diagram](./doc/couch-placing-diagram.png)
+![Couch Placing Diagram](./images/couch-placing-diagram.png)
