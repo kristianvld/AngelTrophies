@@ -68,15 +68,15 @@ public class CouchUtil {
         yaw = Math.round(yaw / 90) * 90;
         Entity back = getRelative(block, yaw, group);
         yaw += 90;
-        Entity left = getRelative(block, yaw, group);
+        Entity right = getRelative(block, yaw, group);
         yaw += 90;
         Entity forward = getRelative(block, yaw, group);
         yaw += 90;
-        Entity right = getRelative(block, yaw, group);
+        Entity left = getRelative(block, yaw, group);
 
         CouchRole role = CouchRole.Single;
 
-        if (left != null) {
+        if (right != null) {
             if (trophies.containsKey(new Pair(group, CouchRole.LeftEnd))) {
                 role = CouchRole.LeftEnd;
             }
@@ -84,7 +84,7 @@ public class CouchUtil {
                 if (trophies.containsKey(new Pair(group, CouchRole.InnerCorner))) {
                     role = CouchRole.InnerCorner;
                 }
-            } else if (right != null) {
+            } else if (left != null) {
                 if (trophies.containsKey(new Pair(group, CouchRole.Middle))) {
                     role = CouchRole.Middle;
                 }
@@ -93,8 +93,8 @@ public class CouchUtil {
                     role = CouchRole.OuterCorner;
                 }
             }
-        } else if (right != null) {
-            if (trophies.containsKey(new Pair(group, CouchRole.LeftEnd))) {
+        } else if (left != null) {
+            if (trophies.containsKey(new Pair(group, CouchRole.RightEnd))) {
                 role = CouchRole.RightEnd;
             }
         }
