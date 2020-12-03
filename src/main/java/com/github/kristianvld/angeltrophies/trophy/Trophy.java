@@ -57,7 +57,7 @@ public class Trophy {
         itemName = item;
         exampleItem = OraxenItems.exists(item) ? OraxenItems.getItemById(item).build() : null;
         if (exampleItem == null || exampleItem.getAmount() <= 0) {
-            throw new IllegalArgumentException("Invalid Oraxen item provided for trophy.");
+            throw new IllegalArgumentException("Invalid Oraxen item provided for trophy '" + item + "'.");
         }
         this.floor = floor;
         this.floorSmall = floorSmall;
@@ -70,7 +70,7 @@ public class Trophy {
         this.couchGroup = couchGroup;
         this.couchRole = couchRole;
         if ((couchGroup == null || couchRole == null) && (couchGroup != null || couchRole != null)) {
-            throw new IllegalArgumentException("Both CouchGroup and CouchRole needs to be define, not just one.");
+            throw new IllegalArgumentException("Both CouchGroup and CouchRole needs to be define, not just one for the trophy '" + item + "'.");
         }
     }
 

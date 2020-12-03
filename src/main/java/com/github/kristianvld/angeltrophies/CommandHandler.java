@@ -40,9 +40,8 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             }
             return true;
         } else if (args[0].equalsIgnoreCase("reload")) {
-            if (hasPermission(sender, permissionDeniedMessage)) {
-                Main.getInstance().reload();
-                C.main(sender, "Reloaded {0}.", Main.getInstance().getDescription().getName());
+            if (hasPermission(sender, reloadPermission)) {
+                Main.getInstance().reload(sender);
             }
             return true;
         } else if (!(sender instanceof Player)) {

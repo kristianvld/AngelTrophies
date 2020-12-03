@@ -34,7 +34,7 @@ public class Skin {
 
     public Skin(String source, String target, String sticker) {
         if (!OraxenItems.exists(source)) {
-            throw new IllegalArgumentException("Source is not a valid Oraxen item!");
+            throw new IllegalArgumentException("Source is not a valid Oraxen item for Skin '" + sticker + "'. '" + source + "' was not found.");
         }
         ItemStack sourceItem = OraxenItems.getItemById(source).build();
         init(sourceItem.getType(), getModelData(sourceItem), target, sticker);
@@ -46,14 +46,14 @@ public class Skin {
         material = sourceType;
         this.sourceID = sourceID;
         if (!OraxenItems.exists(target)) {
-            throw new IllegalArgumentException("Target is not a valid Oraxen item!");
+            throw new IllegalArgumentException("Target is not a valid Oraxen item for the Skin '" + sticker + "', target: '" + target + "'!");
         }
         if (!OraxenItems.exists(sticker)) {
-            throw new IllegalArgumentException("Sticker is not a valid Oraxen item!");
+            throw new IllegalArgumentException("Skin is not a valid Oraxen item for the Skin '" + sticker + "'!");
         }
         ItemStack targetItem = OraxenItems.getItemById(target).build();
         if (targetItem.getType() != sourceType) {
-            throw new IllegalArgumentException("Source and Target needs to be of the same material!");
+            throw new IllegalArgumentException("Source and Target needs to be of the same material for the Skin '" + sticker + "'. Provided target: " + targetItem.getType() + ", provided source: " + sourceType + "!");
         }
         targetID = getModelData(targetItem);
         targetName = target;

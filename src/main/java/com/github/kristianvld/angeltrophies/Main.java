@@ -6,7 +6,9 @@ import com.github.kristianvld.angeltrophies.skin.Skin;
 import com.github.kristianvld.angeltrophies.skin.SkinManager;
 import com.github.kristianvld.angeltrophies.trophy.Trophy;
 import com.github.kristianvld.angeltrophies.trophy.TrophyManager;
+import com.github.kristianvld.angeltrophies.util.C;
 import org.bukkit.Material;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.event.HandlerList;
@@ -49,12 +51,21 @@ public class Main extends JavaPlugin {
         }
     }
 
-    public void reload() {
-        HandlerList.unregisterAll(skinManager);
-        HandlerList.unregisterAll(trophyManager);
-        getLogger().info("Reloading...");
-        loadManagers();
-        getLogger().info("Done Reloading.");
+    public void reload(CommandSender sender) {
+        try {
+            HandlerList.unregisterAll(skinManager);
+            HandlerList.unregisterAll(trophyManager);
+            getLogger().info("Reloading...");
+            loadManagers();
+            getLogger().info("Done Reloading.");
+            C.main(sender, "Reloaded {0}.", Main.getInstance().getDescription().getName());
+        } catch (Exception e) {
+            getLogger().log(Level.SEVERE, "Error while reloading:", e);
+            getLogger().severe("An error occurred while enabling AngelTrophies, disabling...");
+            C.error(sender, "An error occurred while reload {0}.", Main.getInstance().getDescription().getName());
+            C.error(sender, "Disabling the plugin...");
+            setEnabled(false);
+        }
     }
 
     private void loadManagers() {

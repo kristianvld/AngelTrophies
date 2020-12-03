@@ -18,6 +18,7 @@ public class CouchUtil {
     private static final Map<Pair<String, CouchRole>, Trophy> trophies = new HashMap<>();
 
     public static void buildCache(Collection<Trophy> trophies) {
+        CouchUtil.trophies.clear();
         Set<String> groups = new HashSet<>();
         for (Trophy t : trophies) {
             if (t.getCouchRole() != null) {

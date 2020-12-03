@@ -28,11 +28,17 @@ public class C {
     }
 
     public static void main(CommandSender receiver, String msg, Object... objs) {
+        if (receiver == null) {
+            return;
+        }
         String message = prefix(prefixMain, colorBodyMain, msg, objs);
         receiver.sendMessage(message);
     }
 
     public static void error(CommandSender receiver, String msg, Object... objs) {
+        if (receiver == null) {
+            return;
+        }
         String message = prefix(prefixError, colorBodyError, msg, objs);
         receiver.sendMessage(message);
     }
