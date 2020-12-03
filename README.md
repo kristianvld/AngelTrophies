@@ -165,3 +165,42 @@ chair:
 To place or pickup a trophy, just shift right click. To mount a mountable trophy with a slab, just normal right click or sneak on top of the trophy. Currently trophies are placeable and pickup-able by any player, but should follow other protection plugins. 
 
 Like if you do not have permission to interact with a block in a certain chunk, you should not be able to place or pickup trophies. This has not been tested with other protection plugins.
+
+### Couches:
+Couches are trophies that can automatically connect together. A normal layout would be that you have a default couch item, e.g. a chair, but when you place this chair next to another chair, then it "connects" to the other chair, which in our case is another item model, and when you place it backup, it returns back a single chair. You can think for them to work in a similar sense as stairs.
+
+Couches extends floor trophies and needs both for the following two options defined, `floor.chair.group` and `floor.chair.role`.
+
+Example:
+
+```YAML
+chair:
+  material: PAPER
+  displayname: "&4Chair"
+  Pack:
+    generate_model: false
+    model: item/trophies/chair.json
+    custom_model_data: 2
+  trophies:
+    floor:
+      small: false
+      offset: 0
+      place_slab: true
+      rotation_resolution: 90
+      couch:
+        group: "red-chair"
+        role: "single"
+```
+
+The `group` is a unique identifier that specify what other "couches" to connect to. E.g. if you have two couch groups, `red-chair` and `blue-chair`, then blue chairs will not connect to red chairs as they are different groups.
+
+The role specifies the role type of this item and needs to be one of the following:
+`Single`, `RightEnd`, `LeftEnd`, `Middle`, `InnerCorner` or `OuterCorner`
+
+All couch groups needs to have the `Single` role defined. This is the default role that will be placed and the role you will get when picking up any couch part. All other roles are optional.
+
+For designing couches or help with placing them for players see the [Design and placing diagram](#Design%20and%20placing%20diagram)
+
+
+### Design and placing diagram:
+![Couch Placing Diagram](./doc/couch-placing-diagram.png)
