@@ -221,10 +221,6 @@ public class Trophy {
         return null;
     }
 
-    public ArmorStand place(Player player, Block block, BlockFace face, EquipmentSlot hand) {
-        return place(player, block, face, hand, player.getEquipment().getItem(hand));
-    }
-
     public ArmorStand place(Player player, Block block, BlockFace face, EquipmentSlot hand, ItemStack item) {
         Vector offset;
         boolean small;
@@ -277,8 +273,24 @@ public class Trophy {
                 seat.remove();
             }
             BlockVector bv = getBlockVector(entity);
-            Block block = entity.getWorld().getBlockAt(bv.getBlockX(), bv.getBlockY(), bv.getBlockZ());
-            block.setType(Material.AIR);
+            if (bv != null) {
+                Block block = entity.getWorld().getBlockAt(bv.getBlockX(), bv.getBlockY(), bv.getBlockZ());
+                block.setType(Material.AIR);
+            } else {
+                // Old legacy handling, check nearby blocks up and down for slabs
+                Block slab = entity.getLocation().getBlock();
+                if (slab.getType() == SLAB_TYPE) {
+                    slab.setType(Material.AIR);
+                }
+                slab = slab.getRelative(BlockFace.UP);
+                if (slab.getType() == SLAB_TYPE) {
+                    slab.setType(Material.AIR);
+                }
+                slab = slab.getRelative(BlockFace.DOWN, 2);
+                if (slab.getType() == SLAB_TYPE) {
+                    slab.setType(Material.AIR);
+                }
+            }
         }
         entity.remove();
         return true;
