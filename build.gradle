@@ -5,22 +5,23 @@
 plugins {
     id 'java'
     id 'idea'
-    id 'kr.entree.spigradle' version '1.2.4'
+    id 'kr.entree.spigradle' version '2.4.2'
 }
 
 
 repositories {
+    spigotmc()
     mavenCentral()
     enginehub()
     jitpack()
-
+    codemc()
 }
 
 dependencies {
-    compileOnly spigot('1.16.1')
+    compileOnly spigot('1.16.5')
     compileOnly worldguard()
-    implementation 'com.github.VergilPrime:AngelProtect:1.5.4'
-    implementation 'com.github.oraxen:Oraxen:5b10acaf8a'
+    compileOnly 'com.github.VergilPrime:AngelProtect:1.5.4'
+    compileOnly 'com.github.oraxen:Oraxen:5b10acaf8a'
 }
 
 def getVersionName = { ->
