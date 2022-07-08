@@ -10,6 +10,7 @@ plugins {
 
 
 repositories {
+    spigotmc()
     mavenCentral()
     enginehub()
     jitpack()
@@ -19,14 +20,14 @@ repositories {
 dependencies {
     compileOnly spigot('1.16.5')
     compileOnly worldguard()
-    implementation 'com.github.VergilPrime:AngelProtect:1.5.4'
-    implementation 'com.github.oraxen:Oraxen:5b10acaf8a'
+    compileOnly 'com.github.VergilPrime:AngelProtect:1.5.4'
+    compileOnly 'com.github.oraxen:Oraxen:5b10acaf8a'
 }
 
 def getVersionName = { ->
     def stdout = new ByteArrayOutputStream()
     exec {
-        commandLine 'bash', '-c', 'git describe --tags --always || echo v1.0.0-beta'
+        commandLine 'sh', '-c', 'git describe --tags --always || echo v1.0.0-beta'
         standardOutput = stdout
     }
     return stdout.toString().trim()
